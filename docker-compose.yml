@@ -11,6 +11,6 @@ services:
     volumes:
       - ./app:/app # mount file aplikasi untuk hot reload (opsional)
     environment:
-      - FLASK_DEBUG=1
+      - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
     restart: unless-stopped

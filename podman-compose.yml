@@ -13,7 +13,7 @@ services:
       - ./uploads:/uploads:Z
       - ./qr_output:/qr_output:Z
     environment:
-      - FLASK_DEBUG=1
+      - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
       - FLASK_APP=app.py
       - MAX_WORKERS=6
