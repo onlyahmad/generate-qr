@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QR Generator Web</title>
+    <style>
+      body {
+        font-family: Arial;
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+      }
+      .box {
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .success {
+        background: #e7ffe7;
+        padding: 10px;
+      }
+      .error {
+        background: #ffe7e7;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>QR Code Generator (Web)</h2>
+
+    <div class="box">
+      <form method="POST" enctype="multipart/form-data">
+        <label>Pilih File Excel / CSV:</label><br /><br />
+        <input type="file" name="file" required /><br /><br />
+        <button type="submit">Proses</button>
+      </form>
+    </div>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %} {% if result %}
+    <div class="success">
+      <h3>Hasil:</h3>
+      <ul>
+        <li>Generated: {{ result.generated }}</li>
+        <li>Skipped: {{ result.skipped }}</li>
+        <li>Invalid: {{ result.invalid }}</li>
+      </ul>
+
+      <p>Folder output:</p>
+      <b>{{ output_folder }}</b>
+
+      {% if zip_filename %}
+      <p>
+        <a
+          href="{{ url_for('download_file', filename=zip_filename) }}"
+          class="success"
+          style="
+            text-decoration: none;
+            border: 1px solid green;
+            display: inline-block;
+            margin-top: 10px;
+          "
+          >Download ZIP</a
+        >
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </body>
+</html>
