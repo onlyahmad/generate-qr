@@ -18,6 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy seluruh source code ke container
 COPY app /app
 
+# ===== FIX: Buat folder uploads & beri izin write =====
+RUN mkdir -p /app/uploads && chmod 777 /app/uploads
+# ======================================================
+
 # Expose port Flask
 EXPOSE 5001
 

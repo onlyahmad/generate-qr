@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./app:/app:Z # :Z agar bisa di-mount di SELinux (Fedora/RHEL/CentOS)
+      - ./uploads:/uploads:Z
+      - ./qr_output:/qr_output:Z
+    environment:
+      - FLASK_DEBUG=1
+      - PYTHONUNBUFFERED=1
+      - FLASK_APP=app.py
+      - MAX_WORKERS=6
+      - MAX_FILE_SIZE_BYTES=5242880
+      # - REQUIRE_SIGNATURE=1          # aktifkan bila ingin verifikasi HMAC
+      # - SIGNATURE_SECRET=verysecret  # rahasia HMAC (jangan commit ke git)
+      - RATE_LIMIT_DELAY_SECONDS=0.01
+      - AUDIT_LOG_PATH=/tmp/generate_audit.jsonl
+      - APP_LOG_PATH=/tmp/generate.log
+      - UPLOAD_FOLDER=/uploads
+      - OUTPUT_BASE=/qr_output
+    restart: unless-stopped
+
+    # Optional untuk Podman
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
