@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR Code Generator</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ===== THEME VARIABLES ===== */
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --success: #10b981;
+        --success-hover: #059669;
+        --bg: #f9fafb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+      }
+      [data-theme="dark"] {
+        --bg: #111827;
+        --card: #1f2937;
+        --text: #f3f4f6;
+        --muted: #9ca3af;
+        --border: #374151;
+        --primary: #3b82f6;
+      }
+
+      /* ===== GLOBAL ===== */
+      body {
+        font-family: Inter, sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        background: var(--card);
+        padding: 2rem;
+        width: 100%;
+        max-width: 580px;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Heading */
+      h2 {
+        text-align: center;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      /* Toggle Theme */
+      .theme-toggle {
+        text-align: right;
+        margin-bottom: 10px;
+      }
+      .toggle-btn {
+        cursor: pointer;
+        background: var(--border);
+        padding: 6px 12px;
+        border-radius: 8px;
+        display: inline-block;
+        color: var(--text);
+      }
+
+      /* Upload */
+      .upload-area {
+        border: 2px dashed var(--border);
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.25s;
+        background: var(--bg);
+        position: relative;
+      }
+      .upload-icon {
+        font-size: 2.7rem;
+        margin-bottom: 5px;
+      }
+      .upload-area:hover {
+        border-color: var(--primary);
+      }
+      input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      /* File name */
+      #fileNameDisplay {
+        margin-top: 10px;
+        display: none;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      /* Button */
+      button {
+        width: 100%;
+        padding: 0.9rem;
+        border: none;
+        background: var(--primary);
+        color: white;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-top: 1.5rem;
+        font-weight: 600;
+      }
+      button:hover {
+        background: var(--primary-hover);
+      }
+
+      /* Progress Bar */
+      .progress-wrapper {
+        margin-top: 1.5rem;
+        display: none;
+      }
+      .progress-bar-bg {
+        width: 100%;
+        height: 12px;
+        background: var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        width: 0%;
+        height: 12px;
+        background: var(--primary);
+      }
+
+      /* Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .stat-card {
+        background: var(--bg);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      /* Output Path */
+      .output-path {
+        font-family: monospace;
+        padding: 0.8rem;
+        background: var(--bg);
+        border-radius: 8px;
+        margin-top: 0.5rem;
+      }
+
+      /* Download Button */
+      .download-btn {
+        display: block;
+        text-align: center;
+        padding: 0.9rem;
+        margin-top: 1rem;
+        color: white;
+        background: var(--success);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .download-btn:hover {
+        background: var(--success-hover);
+      }
+
+      /* Preview images */
+      .preview-grid {
+        margin-top: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.7rem;
+      }
+      .preview-grid img {
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="theme-toggle">
+        <span class="toggle-btn" id="toggleTheme">🌙 Dark / Light</span>
+      </div>
+
+      <h2>QR Code Generator</h2>
+
+      {{ if .Error }}
+      <div
+        class="alert"
+        style="
+          background: #fee2e2;
+          color: #b91c1c;
+          padding: 12px;
+          border-radius: 6px;
+        "
+      >
+        {{ .Error }}
+      </div>
+      {{ end }}
+
+      <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-area" id="dropZone">
+          <div class="upload-icon">📂</div>
+          <div>Klik atau seret file Excel/CSV ke sini</div>
+          <input
+            type="file"
+            name="file"
+            id="fileInput"
+            accept=".xlsx,.xls,.csv"
+            required
+          />
+        </div>
+
+        <div id="fileNameDisplay"></div>
+
+        <button type="submit">Proses File</button>
+
+        <!-- Dummy Progress -->
+        <div class="progress-wrapper" id="progressWrapper">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </form>
+
+      {{ if .Result }}
+      <div class="result-card">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">{{ .Result.Generated }}</div>
+            <div>Sukses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ .Result.Skipped }}</div>
+            <div>Dilewati</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ .Result.Invalid }}</div>
+            <div>Gagal</div>
+          </div>
+        </div>
+
+        <!-- Output folder -->
+        <h4 style="margin-top: 1.5rem">Folder Output:</h4>
+        <div class="output-path">{{ .OutputFolder }}</div>
+
+        <!-- Preview QR -->
+        <h4 style="margin-top: 1.5rem">Preview:</h4>
+        <div class="preview-grid">
+          {{ range $i, $v := .Preview }}
+          <img src="/preview/{{ $v }}" />
+          {{ end }}
+        </div>
+
+        <!-- Download ZIP -->
+        {{ if .Result.ZipFilename }}
+        <a class="download-btn" href="/download/{{ .Result.ZipFilename }}">
+          ⬇ Download ZIP
+        </a>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+
+    <script>
+      /* ===== THEME TOGGLE ===== */
+      const toggleBtn = document.getElementById("toggleTheme");
+      toggleBtn.addEventListener("click", () => {
+        const html = document.documentElement;
+        const newTheme = html.dataset.theme === "light" ? "dark" : "light";
+        html.dataset.theme = newTheme;
+        localStorage.setItem("theme", newTheme);
+      });
+
+      document.documentElement.dataset.theme =
+        localStorage.getItem("theme") || "light";
+
+      /* ===== FILE NAME DISPLAY ===== */
+      const fileInput = document.getElementById("fileInput");
+      const fileName = document.getElementById("fileNameDisplay");
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+      fileInput.addEventListener("change", () => {
+        const f = fileInput.files[0];
+        if (!f) return;
+
+        if (f.size > MAX_FILE_SIZE) {
+          alert("Ukuran file maksimal 5 MB!");
+          fileInput.value = "";
+          return;
+        }
+
+        fileName.style.display = "block";
+        fileName.textContent = "File dipilih: " + f.name;
+      });
+
+      /* ===== DUMMY PROGRESS BAR ===== */
+      document.getElementById("uploadForm").addEventListener("submit", () => {
+        const bar = document.getElementById("progressFill");
+        const wrap = document.getElementById("progressWrapper");
+        wrap.style.display = "block";
+        bar.style.width = "0%";
+
+        let p = 0;
+        const timer = setInterval(() => {
+          p += 5;
+          bar.style.width = p + "%";
+          if (p >= 100) clearInterval(timer);
+        }, 120);
+      });
+
+      /* ===== DRAG & DROP ===== */
+      const dropZone = document.getElementById("dropZone");
+
+      ["dragenter", "dragover"].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = "var(--primary)";
+        });
+      });
+      ["dragleave", "drop"].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = "var(--border)";
+        });
+      });
+    </script>
+  </body>
+</html>

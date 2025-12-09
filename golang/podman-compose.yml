@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  go_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_app
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./uploads:/app/uploads:Z
+      - ./qr_output:/app/qr_output:Z
+    environment:
+      - PORT=5001
+      - UPLOAD_FOLDER=/app/uploads
+      - OUTPUT_BASE=/app/qr_output
+    restart: unless-stopped
+    userns_mode: keep-id
+    security_opt:
+      - label=disable

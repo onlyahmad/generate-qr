@@ -1,0 +1,22 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+podman-compose.yml
+
+# App Data (mounted volumes)
+uploads/
+qr_output/
+
+# Logs and Temp
+*.log
+tmp/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
