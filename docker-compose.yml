@@ -9,8 +9,20 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./app:/app # mount file aplikasi untuk hot reload (opsional)
+      - ./app:/app
+      - ./uploads:/app/uploads
+      - ./qr_output:/app/qr_output
     environment:
       - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
+      - FLASK_APP=app.py
+      - MAX_WORKERS=6
+      - MAX_FILE_SIZE_BYTES=5242880
+      # - REQUIRE_SIGNATURE=1          # aktifkan bila ingin verifikasi HMAC
+      # - SIGNATURE_SECRET=verysecret  # rahasia HMAC (jangan commit ke git)
+      - RATE_LIMIT_DELAY_SECONDS=0.01
+      - AUDIT_LOG_PATH=/tmp/generate_audit.jsonl
+      - APP_LOG_PATH=/tmp/generate.log
+      - UPLOAD_FOLDER=/app/uploads
+      - OUTPUT_BASE=/app/qr_output
     restart: unless-stopped
