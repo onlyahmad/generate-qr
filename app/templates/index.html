@@ -1,70 +1,280 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
   <head>
-    <title>QR Generator Web</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Generator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-color: #1f2937;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --success-bg: #dcfce7;
+        --success-text: #166534;
+        --error-bg: #fee2e2;
+        --error-text: #991b1b;
+      }
+
       body {
-        font-family: Arial;
-        max-width: 600px;
-        margin: auto;
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
         padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
       }
-      .box {
-        padding: 20px;
-        border: 1px solid #ccc;
+
+      .container {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        width: 100%;
+        max-width: 500px;
+        padding: 2rem;
+      }
+
+      h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-color);
+        font-weight: 700;
+      }
+
+      .upload-area {
+        border: 2px dashed var(--border-color);
         border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        position: relative;
       }
-      .success {
-        background: #e7ffe7;
-        padding: 10px;
+
+      .upload-area:hover {
+        border-color: var(--primary-color);
       }
-      .error {
-        background: #ffe7e7;
-        padding: 10px;
+
+      .upload-area input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .upload-icon {
+        font-size: 2rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      .upload-text {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        width: 100%;
+        cursor: pointer;
+        margin-top: 1.5rem;
+        transition: background-color 0.2s;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .result-card {
+        margin-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1.5rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 0.5rem;
+        background-color: var(--bg-color);
+        border-radius: 6px;
+      }
+
+      .stat-value {
+        display: block;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--primary-color);
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .output-path {
+        background-color: var(--bg-color);
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+        margin-bottom: 1.5rem;
+        color: var(--text-muted);
+      }
+
+      .download-btn {
+        display: block;
+        text-align: center;
+        background-color: #10b981; /* Emerald 500 */
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+
+      .download-btn:hover {
+        background-color: #059669; /* Emerald 600 */
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .alert-error {
+        background-color: var(--error-bg);
+        color: var(--error-text);
+      }
+
+      .file-name-display {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 500;
+        display: none;
       }
     </style>
   </head>
   <body>
-    <h2>QR Code Generator (Web)</h2>
+    <div class="container">
+      <h2>QR Code Generator</h2>
 
-    <div class="box">
-      <form method="POST" enctype="multipart/form-data">
-        <label>Pilih File Excel / CSV:</label><br /><br />
-        <input type="file" name="file" required /><br /><br />
-        <button type="submit">Proses</button>
+      {% if error %}
+      <div class="alert alert-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-area" id="dropZone">
+          <div class="upload-icon">📂</div>
+          <div class="upload-text">Klik atau seret file Excel/CSV ke sini</div>
+          <input
+            type="file"
+            name="file"
+            required
+            id="fileInput"
+            accept=".xlsx, .xls, .csv"
+          />
+          <div class="file-name-display" id="fileNameDisplay"></div>
+        </div>
+        <button type="submit">Proses File</button>
       </form>
-    </div>
 
-    {% if error %}
-    <p class="error">{{ error }}</p>
-    {% endif %} {% if result %}
-    <div class="success">
-      <h3>Hasil:</h3>
-      <ul>
-        <li>Generated: {{ result.generated }}</li>
-        <li>Skipped: {{ result.skipped }}</li>
-        <li>Invalid: {{ result.invalid }}</li>
-      </ul>
+      {% if result %}
+      <div class="result-card">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value">{{ result.generated }}</span>
+            <span class="stat-label">Sukses</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ result.skipped }}</span>
+            <span class="stat-label">Dilewati</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ result.invalid }}</span>
+            <span class="stat-label">Gagal</span>
+          </div>
+        </div>
 
-      <p>Folder output:</p>
-      <b>{{ output_folder }}</b>
+        <div style="margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500">
+          Folder Output:
+        </div>
+        <div class="output-path">{{ output_folder }}</div>
 
-      {% if zip_filename %}
-      <p>
+        {% if zip_filename %}
         <a
           href="{{ url_for('download_file', filename=zip_filename) }}"
-          class="success"
-          style="
-            text-decoration: none;
-            border: 1px solid green;
-            display: inline-block;
-            margin-top: 10px;
-          "
-          >Download ZIP</a
+          class="download-btn"
         >
-      </p>
+          ⬇️ Download ZIP
+        </a>
+        {% endif %}
+      </div>
       {% endif %}
     </div>
-    {% endif %}
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const fileNameDisplay = document.getElementById("fileNameDisplay");
+      const dropZone = document.getElementById("dropZone");
+
+      fileInput.addEventListener("change", function (e) {
+        if (this.files && this.files[0]) {
+          fileNameDisplay.textContent = "File terpilih: " + this.files[0].name;
+          fileNameDisplay.style.display = "block";
+          dropZone.style.borderColor = "var(--primary-color)";
+        }
+      });
+
+      // Drag and drop visual feedback
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        dropZone.style.borderColor = "var(--primary-color)";
+        dropZone.style.backgroundColor = "#eff6ff";
+      }
+
+      function unhighlight(e) {
+        dropZone.style.borderColor = "var(--border-color)";
+        dropZone.style.backgroundColor = "transparent";
+      }
+    </script>
   </body>
 </html>
