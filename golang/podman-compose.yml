@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: go_app
     ports:
-      - "5001:5001"
+      - "5005:5001"
     volumes:
       - ./uploads:/app/uploads:Z
       - ./qr_output:/app/qr_output:Z

@@ -16,7 +16,8 @@ func main() {
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Views:     engine,
+		BodyLimit: 10 * 1024 * 1024, // 10MB to allow handler to catch >5MB files
 	})
 
 	// Static files

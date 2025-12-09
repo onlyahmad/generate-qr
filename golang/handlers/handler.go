@@ -18,7 +18,22 @@ func Upload(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.Render("index", fiber.Map{
-			"error": "Tidak ada file diupload.",
+			"Error": "Tidak ada file diupload.",
+		})
+	}
+
+	// Validate file size (max 5MB)
+	if file.Size > 5*1024*1024 {
+		return c.Render("index", fiber.Map{
+			"Error": "Ukuran file melebihi batas 5MB.",
+		})
+	}
+
+	// Validate file extension
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".xlsx" && ext != ".xls" && ext != ".csv" {
+		return c.Render("index", fiber.Map{
+			"Error": "Format file tidak didukung. Harap upload file Excel (.xlsx, .xls) atau CSV (.csv).",
 		})
 	}
 
