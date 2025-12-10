@@ -198,6 +198,21 @@ func RunGenerate(filePath string, outputFolder string) (*Result, error) {
 	return result, nil
 }
 
+func validateHeaders(headers []string) error {
+	required := []string{"NO IDENTITAS", "NOMOR KK", "NAMA LENGKAP", "KODE QR"}
+	headerMap := make(map[string]bool)
+	for _, h := range headers {
+		headerMap[strings.TrimSpace(h)] = true
+	}
+
+	for _, req := range required {
+		if !headerMap[req] {
+			return fmt.Errorf("missing required column: %s", req)
+		}
+	}
+	return nil
+}
+
 func readExcel(filePath string) ([]map[string]string, error) {
 	f, err := excelize.OpenFile(filePath)
 	if err != nil {
@@ -216,6 +231,10 @@ func readExcel(filePath string) ([]map[string]string, error) {
 	}
 
 	headers := rows[0]
+	if err := validateHeaders(headers); err != nil {
+		return nil, err
+	}
+
 	var result []map[string]string
 	for _, row := range rows[1:] {
 		data := make(map[string]string)
@@ -239,6 +258,10 @@ func readCSV(filePath string) ([]map[string]string, error) {
 	r := csv.NewReader(f)
 	headers, err := r.Read()
 	if err != nil {
+		return nil, err
+	}
+
+	if err := validateHeaders(headers); err != nil {
 		return nil, err
 	}
 

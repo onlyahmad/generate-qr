@@ -67,7 +67,7 @@ func Upload(c *fiber.Ctx) error {
 	result, err := service.RunGenerate(filepathStr, outputFolder)
 	if err != nil {
 		return c.Render("index", fiber.Map{
-			"error": err.Error(),
+			"Error": err.Error(),
 		})
 	}
 
